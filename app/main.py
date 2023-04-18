@@ -9,6 +9,7 @@ from psycopg2.extras import RealDictCursor
 from . import models, scheemas
 from .database import engine, get_db
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -45,7 +46,7 @@ def get_one_post(id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=scheemas.PostResponse)
-def post_posts(post: scheemas.PostCreate, db: Session = Depends(get_db)):
+def create_post(post: scheemas.PostCreate, db: Session = Depends(get_db)):
     """ Writes a new entry into the database, given a post. """
 
     new_post = models.Post(**post.dict())
@@ -91,3 +92,22 @@ def update_post(id: int, updated_post: scheemas.PostCreate, db: Session = Depend
     db.commit()
 
     return post_query.first()
+
+@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=scheemas.UserResponse)
+def create_user(user: scheemas.UserCreate, db: Session = Depends(get_db)):
+    """ Adds a new user into the database, given the email and password. """
+    
+    new_user = models.User(**user.dict())
+    db.add(new_user)
+    
+    try:
+        db.commit()
+
+    except SQLAlchemyError:
+        raise HTTPException(
+            status_code=status.HTTP_200_OK,
+            detail="Email already in use."
+            )
+    
+    db.refresh(new_user)
+    return new_user
