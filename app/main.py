@@ -3,7 +3,7 @@ import time
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from random import randrange
 from psycopg2.extras import RealDictCursor
 from . import models, scheemas
@@ -20,7 +20,7 @@ def root():
     return {"detail": "Hello world."}
 
 
-@app.get("/posts")
+@app.get("/posts", response_model=List[scheemas.PostResponse])
 def get_posts(db: Session = Depends(get_db)):
     """ Retrieves all posts from the database. """
 
@@ -29,7 +29,7 @@ def get_posts(db: Session = Depends(get_db)):
     return posts
 
 
-@app.get("/posts/{id}")
+@app.get("/posts/{id}", response_model=scheemas.PostResponse)
 def get_one_post(id: int, db: Session = Depends(get_db)):
     """ Retrieves a single post from the database, given a post id. """
 
@@ -44,7 +44,7 @@ def get_one_post(id: int, db: Session = Depends(get_db)):
     return post
 
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
+@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=scheemas.PostResponse)
 def post_posts(post: scheemas.PostCreate, db: Session = Depends(get_db)):
     """ Writes a new entry into the database, given a post. """
 
@@ -74,7 +74,7 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@app.put("/posts/{id}")
+@app.put("/posts/{id}", response_model=scheemas.PostResponse)
 def update_post(id: int, updated_post: scheemas.PostCreate, db: Session = Depends(get_db)):
     """ Updates an entry from the database, given a post id and an updated post. """
 
