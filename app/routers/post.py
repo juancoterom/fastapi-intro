@@ -2,7 +2,7 @@ from .. import models, schemas, oauth2
 from ..database import get_db
 from fastapi import status, HTTPException, Response, APIRouter, Depends
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 
 router = APIRouter(prefix="/posts", tags=['Posts'])
@@ -11,11 +11,15 @@ router = APIRouter(prefix="/posts", tags=['Posts'])
 @router.get("/", response_model=List[schemas.PostResponse])
 def get_posts(
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user)
+    current_user: int = Depends(oauth2.get_current_user),
+    limit: int = 10, skip: int = 0, search: Optional[str] = ""
     ):
     """ Retrieves all posts from the database. """
 
-    posts = db.query(models.Post).all()
+    # To retrieve all posts of current user from the database:
+    # posts = db.query(models.Post).filter(models.Post.owner_id == current_user.id).all()
+
+    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
 
     return posts
 
@@ -24,9 +28,8 @@ def get_posts(
 def get_one_post(
     id: int, 
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user)
     ):
-    """ Retrieves a single post from the database, given a post id. """
+    """ Retrieves a post from the database, given a post id. """
 
     post = db.query(models.Post).filter(models.Post.id == id).first()
 
