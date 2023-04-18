@@ -11,7 +11,7 @@ router = APIRouter(prefix="/posts", tags=['Posts'])
 @router.get("/", response_model=List[schemas.PostResponse])
 def get_posts(
     db: Session = Depends(get_db),
-    user_id: int = Depends(oauth2.get_current_user)
+    current_user: int = Depends(oauth2.get_current_user)
     ):
     """ Retrieves all posts from the database. """
 
@@ -24,7 +24,7 @@ def get_posts(
 def get_one_post(
     id: int, 
     db: Session = Depends(get_db),
-    user_id: int = Depends(oauth2.get_current_user)
+    current_user: int = Depends(oauth2.get_current_user)
     ):
     """ Retrieves a single post from the database, given a post id. """
 
@@ -43,11 +43,11 @@ def get_one_post(
 def create_post(
     post: schemas.PostCreate, 
     db: Session = Depends(get_db), 
-    user_id: int = Depends(oauth2.get_current_user)
+    current_user: int = Depends(oauth2.get_current_user)
     ):
     """ Writes a new entry into the database, given a post. """
 
-    new_post = models.Post(**post.dict())
+    new_post = models.Post(owner_id=current_user.id, **post.dict())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -59,7 +59,7 @@ def create_post(
 def delete_post(
     id: int, 
     db: Session = Depends(get_db), 
-    user_id: int = Depends(oauth2.get_current_user)
+    current_user: int = Depends(oauth2.get_current_user)
     ):
     """ Deletes a post from the database, given a post id. """
 
@@ -82,7 +82,7 @@ def update_post(
     id: int, 
     updated_post: schemas.PostCreate, 
     db: Session = Depends(get_db),
-    user_id: int = Depends(oauth2.get_current_user)
+    current_user: int = Depends(oauth2.get_current_user)
     ):
     """ Updates an entry from the database, given a post id and an updated post. """
 
