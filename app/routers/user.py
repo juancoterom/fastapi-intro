@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
 
-router = APIRouter()
+router = APIRouter(prefix="/users", tags=['Users'])
 
 
-@router.get("/users/{id}", response_model=schemas.UserResponse)
+@router.get("/{id}", response_model=schemas.UserResponse)
 def get_one_user(id: int, db: Session = Depends(get_db)):
     """ Retrieves a single user from the database, given a user id. """
 
@@ -23,7 +23,7 @@ def get_one_user(id: int, db: Session = Depends(get_db)):
     return user
 
 
-@router.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     """ Adds a new user into the database, given the email and password. """
     
