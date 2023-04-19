@@ -12,10 +12,12 @@ router = APIRouter(prefix="/posts", tags=['Posts'])
 def get_posts(
     db: Session = Depends(get_db),
     limit: int = 10, skip: int = 0, search: Optional[str] = ""
-    ):
+    ) -> schemas.PostResponse:
     """ Retrieves all posts from the database. """
 
-    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    posts = db.query(models.Post).filter(
+        models.Post.title.contains(search)
+        ).limit(limit).offset(skip).all()
 
     return posts
 
@@ -24,7 +26,7 @@ def get_posts(
 def get_one_post(
     id: int, 
     db: Session = Depends(get_db),
-    ):
+    ) -> schemas.PostResponse:
     """ Retrieves a post from the database, given a post id. """
 
     post = db.query(models.Post).filter(models.Post.id == id).first()
@@ -43,8 +45,8 @@ def get_one_post(
 def create_post(
     post: schemas.PostCreate, 
     db: Session = Depends(get_db), 
-    current_user: int = Depends(oauth2.get_current_user)
-    ):
+    current_user: schemas.UserResponse = Depends(oauth2.get_current_user)
+    ) -> schemas.PostResponse:
     """ Writes a new entry into the database, given a post. """
 
     new_post = models.Post(owner_id=current_user.id, **post.dict())
@@ -60,8 +62,8 @@ def create_post(
 def delete_post(
     id: int, 
     db: Session = Depends(get_db), 
-    current_user: int = Depends(oauth2.get_current_user)
-    ):
+    current_user: schemas.UserResponse = Depends(oauth2.get_current_user)
+    ) -> Response:
     """ Deletes a post from the database, given a post id. """
 
     # Retrieve post from database.
@@ -94,8 +96,8 @@ def update_post(
     id: int, 
     updated_post: schemas.PostCreate, 
     db: Session = Depends(get_db),
-    current_user: int = Depends(oauth2.get_current_user)
-    ):
+    current_user: schemas.UserResponse = Depends(oauth2.get_current_user)
+    ) -> schemas.PostResponse:
     """ Updates an entry from the database, given a post id and an updated post. """
 
     # Retrieve post from database.

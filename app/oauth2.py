@@ -15,7 +15,7 @@ ALGORITHM = settings.algorithm
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
 
 
-def create_access_token(data: dict):
+def create_access_token(data: dict) -> str:
     """ Creates access token, given a piece of data. """
 
     to_encode = data.copy()
@@ -26,7 +26,7 @@ def create_access_token(data: dict):
     return encoded_jwt
 
 
-def verify_access_token(token: str, credentials_exception):
+def verify_access_token(token: str, credentials_exception) -> schemas.TokenData:
     """ Decodes and verifies a given token, returns token data. """
 
     try:
@@ -44,7 +44,10 @@ def verify_access_token(token: str, credentials_exception):
     return token_data
 
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(database.get_db)):
+def get_current_user(
+        token: schemas.TokenData = Depends(oauth2_scheme), 
+        db: Session = Depends(database.get_db)
+        ) -> schemas.UserResponse:
     """ Returns current user, given a token. """
     
     credentials_exception = HTTPException(

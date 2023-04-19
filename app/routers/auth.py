@@ -12,7 +12,7 @@ router = APIRouter(prefix="/login", tags=['Authentication'])
 def login(
     user_credentials: OAuth2PasswordRequestForm = Depends(), 
     db: Session = Depends(get_db)
-    ):
+    ) -> dict[str, str]:
     """ Verifies user email and password during login, returns token. """
 
     user = db.query(models.User).filter(models.User.email == user_credentials.username).first()
