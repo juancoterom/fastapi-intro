@@ -11,13 +11,9 @@ router = APIRouter(prefix="/posts", tags=['Posts'])
 @router.get("/", response_model=List[schemas.PostResponse])
 def get_posts(
     db: Session = Depends(get_db),
-    # current_user: int = Depends(oauth2.get_current_user),
     limit: int = 10, skip: int = 0, search: Optional[str] = ""
     ):
     """ Retrieves all posts from the database. """
-
-    # To retrieve all posts of current user from the database:
-    # posts = db.query(models.Post).filter(models.Post.owner_id == current_user.id).all()
 
     posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
 
@@ -52,6 +48,7 @@ def create_post(
     """ Writes a new entry into the database, given a post. """
 
     new_post = models.Post(owner_id=current_user.id, **post.dict())
+
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -67,6 +64,7 @@ def delete_post(
     ):
     """ Deletes a post from the database, given a post id. """
 
+    # Retrieve post from database.
     post_query = db.query(models.Post).filter(models.Post.id == id)
     post = post_query.first()
 
@@ -84,6 +82,7 @@ def delete_post(
             detail="Not authorized to perform requested action."
             )
     
+    # Delete post and save changes.
     post_query.delete(synchronize_session=False)
     db.commit()
 
@@ -99,6 +98,7 @@ def update_post(
     ):
     """ Updates an entry from the database, given a post id and an updated post. """
 
+    # Retrieve post from database.
     post_query = db.query(models.Post).filter(models.Post.id == id)
     post = post_query.first()
 
@@ -116,6 +116,7 @@ def update_post(
             detail="Not authorized to perform requested action."
             )
     
+    # Update post and save changes.
     post_query.update(updated_post.dict(), synchronize_session=False)
     db.commit()
 

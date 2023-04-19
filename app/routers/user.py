@@ -9,11 +9,15 @@ router = APIRouter(prefix="/users", tags=['Users'])
 
 
 @router.get("/{id}", response_model=schemas.UserResponse)
-def get_one_user(id: int, db: Session = Depends(get_db)):
+def get_one_user(
+    id: int, 
+    db: Session = Depends(get_db)
+    ):
     """ Retrieves a single user from the database, given a user id. """
 
     user = db.query(models.User).filter(models.User.id == id).first()
 
+    # Check if user exists in database.
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -24,7 +28,10 @@ def get_one_user(id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+def create_user(
+    user: schemas.UserCreate, 
+    db: Session = Depends(get_db)
+    ):
     """ Adds a new user into the database, given the email and password. """
     
     # Hash password.
@@ -33,7 +40,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     new_user = models.User(**user.dict())
     db.add(new_user)
 
-    # Check if email is available.
+    # Check if email is available and write into database.
     try:
         db.commit()
 
@@ -44,4 +51,5 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
             )
     
     db.refresh(new_user)
+
     return new_user
