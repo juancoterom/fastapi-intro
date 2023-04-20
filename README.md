@@ -6,8 +6,8 @@ Social media application with FastAPI.
 
 - Python 3.9
 - FastAPI
-- SQLAlchemy
-- JWT for token authentication
+- PostgreSQL + SQLAlchemy
+- JWT
 
 ## Running the application
 
