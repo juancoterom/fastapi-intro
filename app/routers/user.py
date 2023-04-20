@@ -40,7 +40,7 @@ def create_user(
     new_user = models.User(**user.dict())
     db.add(new_user)
 
-    # Check if email is available and write into database.
+    # Write into database if email is available.
     try:
         db.commit()
 

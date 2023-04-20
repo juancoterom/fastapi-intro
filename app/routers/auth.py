@@ -17,19 +17,12 @@ def login(
 
     user = db.query(models.User).filter(models.User.email == user_credentials.username).first()
 
-    # Check if email exists in database.
-    if not user:
+    # Check if email exists in database or if given password matches hashed password.
+    if not user or not utils.verify(user_credentials.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="Invalid credentials."
             )
-    
-    # Check if given password matches hashed password in database.
-    if not utils.verify(user_credentials.password, user.password):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid credentials."
-        )
     
     access_token = oauth2.create_access_token(data={"user_id": user.id})
 
