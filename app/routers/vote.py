@@ -1,5 +1,8 @@
-from .. import models, schemas, oauth2
-from ..database import get_db
+from app.database.database import get_db
+from app.database.models import Post, Vote
+from app.libs.oauth2 import get_current_user
+from .schemas.schemas import VoteCreate, UserResponse
+
 from fastapi import status, HTTPException, Response, APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -9,14 +12,14 @@ router = APIRouter(prefix="/votes", tags=['Votes'])
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def add_vote(
-    vote: schemas.VoteCreate, 
+    vote: VoteCreate, 
     db: Session = Depends(get_db),
-    current_user: schemas.UserResponse = Depends(oauth2.get_current_user)
+    current_user: UserResponse = Depends(get_current_user)
     ) -> dict[str, str]:
     """ Writes vote into database, given the current user and post. """
 
     # Check if post exists in database.
-    post_query = db.query(models.Post).filter(models.Post.id == vote.post_id)
+    post_query = db.query(Post).filter(Post.id == vote.post_id)
     post = post_query.first()
 
     if not post:
@@ -26,9 +29,9 @@ def add_vote(
             )
 
     # Retrieve data from votes table.
-    vote_query = db.query(models.Vote).filter(
-        models.Vote.user_id == current_user.id,
-        models.Vote.post_id == vote.post_id
+    vote_query = db.query(Vote).filter(
+        Vote.user_id == current_user.id,
+        Vote.post_id == vote.post_id
         )
     found_vote = vote_query.first()
     
@@ -39,9 +42,9 @@ def add_vote(
             detail=f"User {current_user.id} has already voted on post {vote.post_id}."
             )
     
-    new_vote = models.Vote(user_id=current_user.id, post_id=vote.post_id)
+    new_vote = Vote(user_id=current_user.id, post_id=vote.post_id)
     db.add(new_vote)
-    post_query.update({models.Post.votes: post.votes+1}, synchronize_session=False)
+    post_query.update({Post.votes: post.votes+1}, synchronize_session=False)
     db.commit()
 
     return {
@@ -51,14 +54,14 @@ def add_vote(
 
 @router.delete("/", status_code=status.HTTP_201_CREATED)
 def delete_vote(
-    vote: schemas.VoteCreate, 
+    vote: VoteCreate, 
     db: Session = Depends(get_db),
-    current_user: schemas.UserResponse = Depends(oauth2.get_current_user)
+    current_user: UserResponse = Depends(get_current_user)
     ) -> Response:
     """ Deletes vote from database, given the current user and post. """
 
     # Check if post exists in database.
-    post_query = db.query(models.Post).filter(models.Post.id == vote.post_id)
+    post_query = db.query(Post).filter(Post.id == vote.post_id)
     post = post_query.first()
 
     if not post:
@@ -68,9 +71,9 @@ def delete_vote(
             )
 
     # Retrieve data from votes table.
-    vote_query = db.query(models.Vote).filter(
-        models.Vote.user_id == current_user.id,
-        models.Vote.post_id == vote.post_id
+    vote_query = db.query(Vote).filter(
+        Vote.user_id == current_user.id,
+        Vote.post_id == vote.post_id
         )
     found_vote = vote_query.first()
 
@@ -82,7 +85,7 @@ def delete_vote(
             )
     
     vote_query.delete(synchronize_session=False)
-    post_query.update({models.Post.votes: post.votes-1}, synchronize_session=False)
+    post_query.update({Post.votes: post.votes-1}, synchronize_session=False)
     db.commit()
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)

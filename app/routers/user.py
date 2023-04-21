@@ -1,5 +1,8 @@
-from .. import models, schemas, utils
-from ..database import get_db
+from app.database.database import get_db
+from app.database.models import User
+from app.libs.utils import hash
+from .schemas.schemas import UserCreate, UserResponse
+
 from fastapi import status, HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
@@ -8,14 +11,14 @@ from sqlalchemy.exc import SQLAlchemyError
 router = APIRouter(prefix="/users", tags=['Users'])
 
 
-@router.get("/{id}", response_model=schemas.UserResponse)
+@router.get("/{id}", response_model=UserResponse)
 def get_one_user(
     id: int, 
     db: Session = Depends(get_db)
-    ) -> models.User:
+    ) -> User:
     """ Retrieves a single user from the database, given a user id. """
 
-    user = db.query(models.User).filter(models.User.id == id).first()
+    user = db.query(User).filter(User.id == id).first()
 
     # Check if user exists in database.
     if not user:
@@ -27,17 +30,17 @@ def get_one_user(
     return user
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
 def create_user(
-    user: schemas.UserCreate, 
+    user: UserCreate, 
     db: Session = Depends(get_db)
-    ) -> models.User:
+    ) -> User:
     """ Adds a new user into the database, given the email and password. """
     
     # Hash password.
-    user.password = utils.hash(user.password)
+    user.password = hash(user.password)
 
-    new_user = models.User(**user.dict())
+    new_user = User(**user.dict())
     db.add(new_user)
 
     # Write into database if email is available.

@@ -1,8 +1,11 @@
-from . import schemas, database, models
-from .config import settings
+from app.database.database import get_db
+from app.database.models import User
+from app.routers.schemas.schemas import TokenData
+from app.database.config import settings
+
 from fastapi import status, HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 
@@ -26,7 +29,7 @@ def create_access_token(data: dict) -> str:
     return encoded_jwt
 
 
-def verify_access_token(token: str, credentials_exception) -> schemas.TokenData:
+def verify_access_token(token: str, credentials_exception) -> TokenData:
     """ Decodes and verifies a given token, returns token data. """
 
     try:
@@ -36,7 +39,7 @@ def verify_access_token(token: str, credentials_exception) -> schemas.TokenData:
         if id is None:
             raise credentials_exception
         
-        token_data = schemas.TokenData(id=id)
+        token_data = TokenData(id=id)
     
     except JWTError:
         raise credentials_exception
@@ -45,9 +48,9 @@ def verify_access_token(token: str, credentials_exception) -> schemas.TokenData:
 
 
 def get_current_user(
-        token: schemas.TokenData = Depends(oauth2_scheme), 
-        db: Session = Depends(database.get_db)
-        ) -> schemas.UserResponse:
+        token: TokenData = Depends(oauth2_scheme), 
+        db: Session = Depends(get_db)
+        ) -> User:
     """ Returns current user, given a token. """
     
     credentials_exception = HTTPException(
@@ -56,6 +59,6 @@ def get_current_user(
         headers={"WWW-Authenticate": "Bearer"}
     )
     token = verify_access_token(token, credentials_exception)
-    user = db.query(models.User).filter(models.User.id == token.id).first()
+    user = db.query(User).filter(User.id == token.id).first()
 
     return user
