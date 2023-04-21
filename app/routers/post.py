@@ -1,6 +1,7 @@
 from .. import models, schemas, oauth2
 from ..database import get_db
 from fastapi import status, HTTPException, Response, APIRouter, Depends
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
@@ -18,7 +19,7 @@ def get_posts(
     posts = db.query(models.Post).filter(
         models.Post.title.contains(search)
         ).limit(limit).offset(skip).all()
-
+    
     return posts
 
 

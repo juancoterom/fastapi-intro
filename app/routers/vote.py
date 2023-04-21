@@ -16,7 +16,8 @@ def add_vote(
     """ Writes vote into database, given the current user and post. """
 
     # Check if post exists in database.
-    post = db.query(models.Post).filter(models.Post.id == vote.post_id).first()
+    post_query = db.query(models.Post).filter(models.Post.id == vote.post_id)
+    post = post_query.first()
 
     if not post:
         raise HTTPException(
@@ -40,6 +41,7 @@ def add_vote(
     
     new_vote = models.Vote(user_id=current_user.id, post_id=vote.post_id)
     db.add(new_vote)
+    post_query.update({models.Post.votes: post.votes+1}, synchronize_session=False)
     db.commit()
 
     return {
@@ -56,7 +58,8 @@ def delete_vote(
     """ Deletes vote from database, given the current user and post. """
 
     # Check if post exists in database.
-    post = db.query(models.Post).filter(models.Post.id == vote.post_id).first()
+    post_query = db.query(models.Post).filter(models.Post.id == vote.post_id)
+    post = post_query.first()
 
     if not post:
         raise HTTPException(
@@ -71,13 +74,15 @@ def delete_vote(
         )
     found_vote = vote_query.first()
 
+    # Delete vote if it exists in database.
     if not found_vote:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Vote does not exist."
             )
-        
+    
     vote_query.delete(synchronize_session=False)
+    post_query.update({models.Post.votes: post.votes-1}, synchronize_session=False)
     db.commit()
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)

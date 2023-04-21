@@ -23,6 +23,7 @@ class Post(Base):
     published = Column(Boolean, server_default='TRUE', nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     owner_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    votes = Column(Integer, server_default='0', nullable=False)
     owner = relationship("User")
 
 
