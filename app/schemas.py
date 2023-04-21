@@ -40,9 +40,9 @@ class PostCreate(PostBase):
 
 class PostResponse(PostBase):
     id: int
+    votes: int
     created_at: datetime
     owner: UserResponse
-    votes: int
 
     class Config:
         orm_mode = True

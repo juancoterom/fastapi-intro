@@ -13,7 +13,7 @@ router = APIRouter(prefix="/posts", tags=['Posts'])
 def get_posts(
     db: Session = Depends(get_db),
     limit: int = 10, skip: int = 0, search: Optional[str] = ""
-    ) -> schemas.PostResponse:
+    ) -> List[models.Post]:
     """ Retrieves all posts from the database. """
 
     posts = db.query(models.Post).filter(
@@ -27,7 +27,7 @@ def get_posts(
 def get_one_post(
     id: int, 
     db: Session = Depends(get_db),
-    ) -> schemas.PostResponse:
+    ) -> models.Post:
     """ Retrieves a post from the database, given a post id. """
 
     post = db.query(models.Post).filter(models.Post.id == id).first()
@@ -47,7 +47,7 @@ def create_post(
     post: schemas.PostCreate, 
     db: Session = Depends(get_db), 
     current_user: schemas.UserResponse = Depends(oauth2.get_current_user)
-    ) -> schemas.PostResponse:
+    ) -> models.Post:
     """ Writes a new entry into the database, given a post. """
 
     new_post = models.Post(owner_id=current_user.id, **post.dict())
@@ -55,7 +55,7 @@ def create_post(
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
-
+    
     return new_post
 
 
@@ -98,7 +98,7 @@ def update_post(
     updated_post: schemas.PostCreate, 
     db: Session = Depends(get_db),
     current_user: schemas.UserResponse = Depends(oauth2.get_current_user)
-    ) -> schemas.PostResponse:
+    ) -> models.Post:
     """ Updates an entry from the database, given a post id and an updated post. """
 
     # Retrieve post from database.

@@ -12,7 +12,7 @@ router = APIRouter(prefix="/users", tags=['Users'])
 def get_one_user(
     id: int, 
     db: Session = Depends(get_db)
-    ) -> schemas.UserResponse:
+    ) -> models.User:
     """ Retrieves a single user from the database, given a user id. """
 
     user = db.query(models.User).filter(models.User.id == id).first()
@@ -31,7 +31,7 @@ def get_one_user(
 def create_user(
     user: schemas.UserCreate, 
     db: Session = Depends(get_db)
-    ) -> schemas.UserResponse:
+    ) -> models.User:
     """ Adds a new user into the database, given the email and password. """
     
     # Hash password.
