@@ -16,12 +16,12 @@ router = APIRouter(prefix="/posts", tags=['Posts'])
 def get_posts(
     db: Session = Depends(get_db),
     limit: int = 10, skip: int = 0, search: Optional[str] = ""
-    ) -> List[Post]:
+) -> List[Post]:
     """ Retrieves all posts from the database. """
 
     posts = db.query(Post).filter(
         Post.title.contains(search)
-        ).limit(limit).offset(skip).all()
+    ).limit(limit).offset(skip).all()
     
     return posts
 
@@ -30,7 +30,7 @@ def get_posts(
 def get_one_post(
     id: int, 
     db: Session = Depends(get_db),
-    ) -> Post:
+) -> Post:
     """ Retrieves a post from the database, given a post id. """
 
     post = db.query(Post).filter(Post.id == id).first()
@@ -40,7 +40,7 @@ def get_one_post(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {id} was not found."
-            )
+        )
     
     return post
 
@@ -50,7 +50,7 @@ def create_post(
     post: PostCreate, 
     db: Session = Depends(get_db), 
     current_user: UserResponse = Depends(get_current_user)
-    ) -> Post:
+) -> Post:
     """ Writes a new entry into the database, given a post. """
 
     new_post = Post(owner_id=current_user.id, **post.dict())
@@ -67,7 +67,7 @@ def delete_post(
     id: int, 
     db: Session = Depends(get_db), 
     current_user: UserResponse = Depends(get_current_user)
-    ) -> Response:
+) -> Response:
     """ Deletes a post from the database, given a post id. """
 
     # Retrieve post from database.
@@ -79,14 +79,14 @@ def delete_post(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {id} does not exist."
-            )
+        )
     
     # Check if current user is the owner of the post.
     if post.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="Not authorized to perform requested action."
-            )
+        )
     
     # Delete post and save changes.
     post_query.delete(synchronize_session=False)
@@ -101,7 +101,7 @@ def update_post(
     updated_post: PostCreate,
     db: Session = Depends(get_db),
     current_user: UserResponse = Depends(get_current_user)
-    ) -> Post:
+) -> Post:
     """ Updates an entry from the database, given a post id and an updated post. """
 
     # Retrieve post from database.
@@ -113,14 +113,14 @@ def update_post(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {id} does not exist."
-            )
+        )
     
     # Check if current user is the owner of the post.
     if post.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="Not authorized to perform requested action."
-            )
+        )
     
     # Update post and save changes.
     post_query.update(updated_post.dict(), synchronize_session=False)

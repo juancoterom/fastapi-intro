@@ -15,7 +15,7 @@ def add_vote(
     vote: VoteCreate, 
     db: Session = Depends(get_db),
     current_user: UserResponse = Depends(get_current_user)
-    ) -> dict[str, str]:
+) -> dict[str, str]:
     """ Writes vote into database, given the current user and post. """
 
     # Check if post exists in database.
@@ -26,13 +26,13 @@ def add_vote(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {vote.post_id} not found."
-            )
+        )
 
     # Retrieve data from votes table.
     vote_query = db.query(Vote).filter(
         Vote.user_id == current_user.id,
         Vote.post_id == vote.post_id
-        )
+    )
     found_vote = vote_query.first()
     
     # Add vote if it does not already exist in database.
@@ -40,7 +40,7 @@ def add_vote(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"User {current_user.id} has already voted on post {vote.post_id}."
-            )
+        )
     
     new_vote = Vote(user_id=current_user.id, post_id=vote.post_id)
     db.add(new_vote)
@@ -49,7 +49,7 @@ def add_vote(
 
     return {
         "message": f"Successfully added vote on post {vote.post_id}."
-        }
+    }
 
 
 @router.delete("/", status_code=status.HTTP_201_CREATED)
@@ -57,7 +57,7 @@ def delete_vote(
     vote: VoteCreate, 
     db: Session = Depends(get_db),
     current_user: UserResponse = Depends(get_current_user)
-    ) -> Response:
+) -> Response:
     """ Deletes vote from database, given the current user and post. """
 
     # Check if post exists in database.
@@ -68,13 +68,13 @@ def delete_vote(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Post with id {vote.post_id} not found."
-            )
+        )
 
     # Retrieve data from votes table.
     vote_query = db.query(Vote).filter(
         Vote.user_id == current_user.id,
         Vote.post_id == vote.post_id
-        )
+    )
     found_vote = vote_query.first()
 
     # Delete vote if it exists in database.
@@ -82,7 +82,7 @@ def delete_vote(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Vote does not exist."
-            )
+        )
     
     vote_query.delete(synchronize_session=False)
     post_query.update({Post.votes: post.votes-1}, synchronize_session=False)

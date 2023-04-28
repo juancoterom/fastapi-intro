@@ -15,7 +15,7 @@ router = APIRouter(prefix="/users", tags=['Users'])
 def get_one_user(
     id: int, 
     db: Session = Depends(get_db)
-    ) -> User:
+) -> User:
     """ Retrieves a single user from the database, given a user id. """
 
     user = db.query(User).filter(User.id == id).first()
@@ -25,7 +25,7 @@ def get_one_user(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found."
-            )
+        )
     
     return user
 
@@ -34,7 +34,7 @@ def get_one_user(
 def create_user(
     user: UserCreate, 
     db: Session = Depends(get_db)
-    ) -> User:
+) -> User:
     """ Adds a new user into the database, given the email and password. """
     
     # Hash password.
@@ -51,7 +51,7 @@ def create_user(
         raise HTTPException(
             status_code=status.HTTP_200_OK,
             detail="Email is already in use."
-            )
+        )
     
     db.refresh(new_user)
 

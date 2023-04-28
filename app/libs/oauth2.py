@@ -48,9 +48,9 @@ def verify_access_token(token: str, credentials_exception) -> TokenData:
 
 
 def get_current_user(
-        token: TokenData = Depends(oauth2_scheme), 
-        db: Session = Depends(get_db)
-        ) -> User:
+    token: TokenData = Depends(oauth2_scheme), 
+    db: Session = Depends(get_db)
+) -> User:
     """ Returns current user, given a token. """
     
     credentials_exception = HTTPException(
@@ -58,6 +58,7 @@ def get_current_user(
         detail="Could not validate credentials.",
         headers={"WWW-Authenticate": "Bearer"}
     )
+    
     token = verify_access_token(token, credentials_exception)
     user = db.query(User).filter(User.id == token.id).first()
 

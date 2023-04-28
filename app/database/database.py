@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 SQLALCHEMY_DATABASE_URL = (
     f"postgresql://{settings.database_username}:"
     f"{settings.database_password}@{settings.database_hostname}/{settings.database_name}"
-    )
+)
 
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)

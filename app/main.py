@@ -18,7 +18,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    )
+)
 
 app.include_router(post.router)
 app.include_router(user.router)
@@ -30,4 +30,4 @@ app.include_router(vote.router)
 def root():
     return {
         "message": "Hello world."
-        }
+    }
