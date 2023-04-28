@@ -1,10 +1,9 @@
 from app.database.database import get_db
-from app.database.models import Post
+from app.database.models import Post, User
 from app.libs.oauth2 import get_current_user
-from .schemas.schemas import PostCreate, PostResponse, UserResponse
+from .schemas.schemas import PostCreate, PostResponse
 
-from fastapi import status, HTTPException, Response, APIRouter, Depends
-from sqlalchemy import func
+from fastapi import status, APIRouter, HTTPException, Response, Depends
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
@@ -49,7 +48,7 @@ def get_one_post(
 def create_post(
     post: PostCreate, 
     db: Session = Depends(get_db), 
-    current_user: UserResponse = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ) -> Post:
     """ Writes a new entry into the database, given a post. """
 
@@ -66,7 +65,7 @@ def create_post(
 def delete_post(
     id: int, 
     db: Session = Depends(get_db), 
-    current_user: UserResponse = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ) -> Response:
     """ Deletes a post from the database, given a post id. """
 
@@ -100,7 +99,7 @@ def update_post(
     id: int, 
     updated_post: PostCreate,
     db: Session = Depends(get_db),
-    current_user: UserResponse = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ) -> Post:
     """ Updates an entry from the database, given a post id and an updated post. """
 

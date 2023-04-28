@@ -1,9 +1,9 @@
 from app.database.database import get_db
-from app.database.models import Post, Vote
+from app.database.models import Post, User, Vote
 from app.libs.oauth2 import get_current_user
-from .schemas.schemas import VoteCreate, UserResponse
+from .schemas.schemas import VoteCreate
 
-from fastapi import status, HTTPException, Response, APIRouter, Depends
+from fastapi import status, APIRouter, HTTPException, Response, Depends
 from sqlalchemy.orm import Session
 
 
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/votes", tags=['Votes'])
 def add_vote(
     vote: VoteCreate, 
     db: Session = Depends(get_db),
-    current_user: UserResponse = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ) -> dict[str, str]:
     """ Writes vote into database, given the current user and post. """
 
@@ -56,7 +56,7 @@ def add_vote(
 def delete_vote(
     vote: VoteCreate, 
     db: Session = Depends(get_db),
-    current_user: UserResponse = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ) -> Response:
     """ Deletes vote from database, given the current user and post. """
 

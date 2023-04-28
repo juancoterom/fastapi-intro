@@ -3,9 +3,9 @@ from app.database.models import User
 from app.libs.utils import hash
 from .schemas.schemas import UserCreate, UserResponse
 
-from fastapi import status, HTTPException, APIRouter, Depends
-from sqlalchemy.orm import Session
+from fastapi import status, APIRouter, HTTPException, Depends
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 
 router = APIRouter(prefix="/users", tags=['Users'])
@@ -32,7 +32,7 @@ def get_one_user(
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
 def create_user(
-    user: UserCreate, 
+    user: UserCreate,
     db: Session = Depends(get_db)
 ) -> User:
     """ Adds a new user into the database, given the email and password. """

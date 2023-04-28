@@ -1,12 +1,12 @@
+from app.database.config import settings
 from app.database.database import get_db
 from app.database.models import User
 from app.routers.schemas.schemas import TokenData
-from app.database.config import settings
 
+from datetime import datetime, timedelta
 from fastapi import status, HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
-from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 
 

@@ -4,7 +4,7 @@ from app.libs.oauth2 import create_access_token
 from app.libs.utils import verify
 from .schemas.schemas import TokenResponse
 
-from fastapi import status, HTTPException, APIRouter, Depends
+from fastapi import status, APIRouter, HTTPException, Depends
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
